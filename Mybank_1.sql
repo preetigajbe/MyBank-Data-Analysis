@@ -1,0 +1,207 @@
+-- CREATE A DATABASE 
+CREATE DATABASE Mybank_1;
+use Mybank_1;
+
+-- RETRIEVE ALL TABLE DATA 
+SELECT * FROM Customers;
+SELECT * FROM Accounts;
+SELECT * FROM Transactions;
+SELECT * FROM Loans;
+SELECT * FROM CreditCards;
+SELECT * FROM Branches;
+SELECT * FROM ATMs;
+
+-- CALCULATE TOTAL NUMBER OF CUSTOMERS 
+SELECT COUNT(*) AS TotalCustomers FROM Customers;
+
+
+-- CALCULATE TOTAL NUMBER OF ACCOUNTS 
+SELECT COUNT(*) AS TotalAccounts FROM Accounts;
+
+-- CALCULATE TOTAL LOAN AMOUNT 
+SELECT SUM(Amount) AS TotalLoansAmount FROM Loans;
+
+-- CALCULATE TOTAL CREDIT LIMIT ACROSS ALL CREDIT CARDS 
+SELECT SUM(CreditLimit) AS TotalCreditLimit FROM CreditCards;
+
+-- FIND ALL ACTIVE ACCOUNTS 
+SELECT * FROM Accounts WHERE Status = 'Active';
+
+-- FIND ALL ACCOUNTS MADE ON 15th JAN 2023
+SELECT * FROM Transactions WHERE TransactionDate > '2023-01-15';
+
+-- FIND LOANS WITH INTEREST RATES ABOVE 5.0
+SELECT * FROM Loans WHERE InterestRate > 5.0;
+
+-- FIND CREDIT CARDS WITH BALANCES EXCEEDING THE CREDIT LIMIT 
+SELECT * FROM CreditCards WHERE Balance > CreditLimit;
+
+-- RETRIEVE CUSTOMER DETAILS ALONG WITH THEIR ACCOUNTS 
+SELECT c.CustomerID, c.Name, c.Age, a.AccountNumber, a.AccountType, a.Balance
+FROM Customers c
+JOIN Accounts a ON c.CustomerID = a.CustomerID;
+
+-- RETRIEVE TRANSACTION DETAILS ALONG WITH ASSOCIATED ACCOUNT AND CUSTOMER INFORMATION 
+SELECT t.TransactionID, t.TransactionDate, t.Amount, t.Type, t.Description, a.AccountNumber, a.AccountType, c.Name AS CustomerName
+FROM Transactions t
+JOIN Accounts a ON t.AccountNumber = a.AccountNumber
+JOIN Customers c ON a.CustomerID = c.CustomerID;
+
+-- TOP 10 CUSTOMERS WITH HIGHEST LOAN AMOUNT 
+SELECT c.Name, l.Amount AS LoanAmount
+FROM Customers c
+JOIN Loans l ON c.CustomerID = l.CustomerID
+ORDER BY l.Amount DESC
+LIMIT 10; 
+
+-- DELETE INACTIVE ACCOUNTS 
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM Accounts
+WHERE Status = 'Inactive';
+
+-- FIND CUSTOMERS WITH MULTIPLE ACCOUNTS 
+SELECT c.CustomerID, c.Name, COUNT(a.AccountNumber) AS NumAccounts
+FROM Customers c
+JOIN Accounts a ON c.CustomerID = a.CustomerID
+GROUP BY c.CustomerID, c.Name
+HAVING COUNT(a.AccountNumber) > 1;
+
+-- PRINT THE FIRST 3 CHARACTERS OF NAME FROM CUSTOMERS TABLE 
+SELECT SUBSTRING(Name, 1, 3) AS FirstThreeCharactersOfName
+FROM Customers;
+
+-- PRINT THE NAME FROM CUSTOMERS TABLE INTO TWO COLUMNS FIRSTNAME AND LASTNAME 
+SELECT     
+          SUBSTRING_INDEX(Name, ' ', 1) AS FirstName,    
+          SUBSTRING_INDEX(Name, ' ', -1) AS LastName
+FROM Customers;
+
+-- SQL QUERY TO SHOW ONLY ODD ROWS FROM CUSTOMERS TABLE 
+SELECT * FROM Customers
+WHERE MOD(CustomerID, 2) <> 0;
+
+-- SQL QUERY TO DETERMINE THE 5TH HIGHEST LOAN AMOUNT WITHOUT USING LIMIT KEYWORD 
+SELECT DISTINCT Amount
+FROM Loans L1
+WHERE 5 = (    
+           SELECT COUNT(DISTINCT Amount)    
+           FROM Loans L2    
+           WHERE L2.Amount >= L1.Amount
+);
+
+-- SQL QUERY TO SHOW THE SECOND HIGHEST LOAN FROM THE LOANS TABLE USING SUB-QUERY 
+SELECT MAX(Amount) AS SecondHighestLoan
+FROM Loans
+WHERE Amount < (    
+          SELECT MAX(Amount)    
+          FROM Loans
+);
+
+-- SQL QUERY TO LIST CUSTOMERID WHOSE ACCOUNT IS INACTIVE 
+SELECT CustomerID
+FROM Accounts
+WHERE Status = 'Inactive';
+
+-- SQL QUERY TO FETCH THE FIRST ROW OF THE CUSTOMERS TABLE 
+SELECT *
+FROM Customers
+LIMIT 1;
+
+-- SQL QUERY TO SHOW THE CURRENT DATE AND TIME 
+SELECT NOW() AS CurrentDateTime;
+
+-- SQL QUERY TO CREATE A NEW TABLE WHICH CONSISTS OF DATA AND STRUCTURE COPIED FROM THE CUSTOMERS 
+CREATE TABLE CustomersClone LIKE Customers;
+INSERT INTO CustomersClone SELECT * FROM Customers;
+
+-- SQL QUERY TO CALCULATE HOW MANY DAYS ARE REMAINING FOR CUSTOMERS TO PAY OFF THE LOANS 
+SELECT     
+           CustomerID,    
+           DATEDIFF(EndDate, CURDATE()) AS DaysRemaining
+FROM Loans
+WHERE EndDate > CURDATE();	
+
+-- QUERY TO FIND THE LATEST TRANSACTION DATE FOR EACH ACCOUNT 
+SELECT AccountNumber, MAX(TransactionDate) AS LatestTransactionDate
+FROM Transactions
+GROUP BY AccountNumber;
+
+-- FIND THE AVERAGE AGE OF CUSTOMERS 
+SELECT AVG(Age) AS AverageAge
+FROM Customers;
+
+-- FIND ACCOUNTS WITH LESS THAN MINIMUM AMOUNT FOR ACCOUNTS OPENED BEFORE 1ST JAN 2022
+SELECT AccountNumber, Balance
+FROM Accounts
+WHERE Balance < 25000
+AND OpenDate <= '2022-01-01';
+
+-- FIND LOANS THAT ARE CURRENTLY ACTIVE 
+SELECT *
+FROM Loans
+WHERE EndDate >= CURDATE()
+AND Status = 'Active';	
+
+-- FIND THE TOTAL AMOUNT OF TRANSACTIONS FOR EACH ACCOUNT FOR A SPECIFIC MONTH 
+SELECT AccountNumber, SUM(Amount) AS TotalAmount
+FROM Transactions
+WHERE MONTH(TransactionDate) = 6  
+AND YEAR(TransactionDate) = 2023
+GROUP BY AccountNumber;
+
+-- FIND THE AVERAGE CREDIT CARD BALANCE FOR EACH CUSTOMER 
+SELECT CustomerID, AVG(Balance) AS AverageCreditCardBalance
+FROM CreditCards
+GROUP BY CustomerID;
+
+-- FIND THE NUMBER OF INACTIVE ATMS PER LOCATION 
+SELECT Location, COUNT(*) AS NumberOfActiveATMs
+FROM ATMs
+WHERE Status = 'Out of Service'
+GROUP BY Location;
+
+-- CATEGORIZE CUSTOMERS INTO THREE AGE GROUPS 
+SELECT 
+    name,
+    age,
+    CASE
+        WHEN age < 30 THEN 'Below 30'
+        WHEN age BETWEEN 30 AND 60 THEN '30 to 60'
+        ELSE 'Above 60'
+    END AS age_group
+FROM customers;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
